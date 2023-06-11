@@ -31,6 +31,7 @@ router.post("/influencer", async (req, res) => {
 router.get("/influencers", async (req, res) => {
     try {
         const influencers = await Influencer.find().select("-password")
+        .populate("socialMedias")
         res.json(influencers)
     } catch (error) {
         res.status(500).json({ error: error.message })
@@ -123,6 +124,27 @@ router.put("/influencer/:_id/addSocialMedia", async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: error.message })
     }
+})
+
+router.put("/influencer/:_id/increment/:times", async (req, res) => {
+    try {
+        const times = req.params.times
+        const influencer = await Influencer.findById(req.params._id)
+
+        if (!influencer) {
+            return res.status(404).json({
+                message: "Can't find influencer with the provided information"
+            })
+        }
+
+        ++influencer[times]
+        await influencer.save()
+        
+        res.status(201).json(influencer)
+    } catch (error) {
+        res.status(500).json({ error: error.message })
+    }
+
 })
 
 router.put("/influencer/:id", upload.single("picture"), async (req, res) => {
